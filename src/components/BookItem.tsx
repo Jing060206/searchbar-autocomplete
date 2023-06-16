@@ -23,6 +23,9 @@ const BookItem: FC<BookItemProps> = ({ item }) => {
 
   return (
     <li className="book-item">
+      <div className="thumbnail">
+        <img src={thumbnail} alt={title} />
+      </div>
       <ul>
         <li>
           <b>title: </b>
