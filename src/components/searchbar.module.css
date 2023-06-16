@@ -1,0 +1,14 @@
+.suggestionList {
+    padding: 1rem;
+    border-radius: 1rem;
+    list-style-type: none;
+    border: 1px solid black;
+    width: 500px;
+    /* overflow: hidden; */
+}
+
+.suggestionList li {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}

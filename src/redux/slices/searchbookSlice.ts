@@ -9,22 +9,24 @@ export interface IBookItem {
     title: string | undefined;
     publishedDate: string | undefined;
     imageLinks:
-      | {
-          smallThumbnail: string | undefined;
-          thumbnail: string | undefined;
-        }
-      | undefined;
+    | {
+      smallThumbnail: string | undefined;
+      thumbnail: string | undefined;
+    }
+    | undefined;
   };
 }
 
 interface searchbookState {
   books: IBookItem[];
+  suggestions: any[];
   keyword: "";
   isLoading: boolean;
 }
 
 const initialState: searchbookState = {
   books: [],
+  suggestions: [],
   keyword: "",
   isLoading: false,
 };
@@ -46,6 +48,23 @@ export const search = createAsyncThunk<
   return res.items;
 });
 
+export const autoComplete = createAsyncThunk<
+  any,
+  undefined,
+  {
+    dispatch: AppDispatch;
+    state: RootState;
+  }
+>("searchbook/autocomplete", async (args, thunkApi) => {
+  const { keyword } = thunkApi.getState().searchbookSlice;
+  const result = await fetch(
+    `https://www.googleapis.com/books/v1/volumes?q=${keyword}&startIndex=0&maxResults=10`
+  );
+  const res = await result.json();
+  console.log("suggeations", res);
+  return res.items;
+});
+
 export const searchbookSlice = createSlice({
   name: "searchbook",
   initialState,
@@ -53,6 +72,9 @@ export const searchbookSlice = createSlice({
     updateKeyword: (state, action) => {
       state.keyword = action.payload;
     },
+    updateSuggestions: (state, action) => {
+      state.suggestions = action.payload;
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -67,10 +89,17 @@ export const searchbookSlice = createSlice({
       .addCase(search.rejected, (state, action) => {
         state.isLoading = false;
         console.log("err", action.error.message);
+      })
+      .addCase(autoComplete.fulfilled, (state, action) => {
+        if (!action.payload) {
+          state.suggestions = [];
+        } else {
+          state.suggestions = action.payload;
+        }
       });
   },
 });
 
-export const { updateKeyword } = searchbookSlice.actions;
+export const { updateKeyword, updateSuggestions } = searchbookSlice.actions;
 
 export default searchbookSlice.reducer;
